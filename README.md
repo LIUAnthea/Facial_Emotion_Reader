@@ -9,7 +9,7 @@ The machine learning models used in this project includes: VGG19 and ResNet-18 f
 - Backend: Flask for server-side operations.
 - Machine Learning: VGG19, ResNet-18 for emotion detection; MobileNetV3Small, EfficientNetB0 for demographic analysis.
 - Data Processing: NumPy, TensorFlow for image and video processing.
-- 
+  
 ![image](https://github.com/LIUAnthea/Facial_Emotion_Reader/assets/130535253/4768f58b-03c6-461e-b7de-4c5f3ffe2ced)
 
 ![image](https://github.com/LIUAnthea/Facial_Emotion_Reader/assets/130535253/a611963f-866d-4095-9455-fcf035fd75bf)
