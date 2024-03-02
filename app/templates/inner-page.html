@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Demo</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="../static/img/emo_logo.jpg" rel="icon">
+  <link href="../static/img/emo_logo.jpg" rel="apple-touch-icon">
+
+  {% include "parts/_styles.html" %}
+  <link href="../static/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="fixed-top header-inner-pages">
+    <div class="container d-flex align-items-center justify-content-lg-between">
+
+      <h1 class="logo me-auto me-lg-0"><a href="/">AI微表情分析<span>.</span></a></h1>
+      <!-- Uncomment below if you prefer to use an image logo -->
+      <!-- <a href="index.html" class="logo me-auto me-lg-0"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
+
+      <nav id="navbar" class="navbar order-last order-lg-0">
+        <ul>
+          <li><a class="nav-link scrollto " href="/">Home</a></li>
+          <li><a class="nav-link scrollto" href="/#about">About</a></li>
+          <li><a class="nav-link scrollto" href="/#team">Team</a></li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav>
+
+    </div>
+  </header><!-- End Header -->
+
+  <main>
+
+    <!-- ======= 彈跳視窗內容 ======= -->
+    <div id="popup"
+      style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; background-color: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 5px; z-index: 9999;">
+      <span style="float: right; cursor: pointer;" onclick="closePopup()">X</span>
+      <h3 style="color:black; font-weight:bold;">歡迎來到測試頁面</h3>
+
+      <p>請允許我們存取您的前鏡頭，並將手機平視臉部，在按下「開始測試」按鈕後，我們將使用您的前鏡頭錄製影片。</p>
+
+      <p>在影片播放結束後，請按下「停止測試」按鈕，感謝您的參與，祝您測試愉快！</p>
+
+    </div>
+    <!-- 彈跳視窗內容結束 -->
+
+    <!-- ======= Video ======= -->
+    <div id="videoContainer">
+
+      <video id="recorded-video" playsinline preload="auto" poster="../static/video/videocover.jpg">
+        <source src="../static/video/iphone_video.mp4" type="video/mp4" />
+        <source src="../static/video/iphone_video.ogv" type="video/ogg" />
+        <source src="../static/video/iphone_video.webm" type="video/webm" />
+        影片無法播放，請改用別的瀏覽器，或將影片 <a href="../static/video/iphone_video.mp4">下載</a>後再播放。
+      </video>
+
+      <br>
+
+      <div class="button-container">
+        <button id="start-button" class="get-started-btn-test">開始測試</button>
+        <button id="stop-button" class="get-started-btn-test">停止測試</button>
+
+        <div class="loading-container">
+          <div class="loading-content">
+            <div class="spinner-border" role="status" aria-hidden="true"></div>
+            <div class="loading-text">結果分析中<br>請停留在此頁面<br>頁面將自動轉跳</div>
+          </div>
+        </div>
+
+      </div>
+      <br>
+
+    </div><!-- End Video -->
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-3 col-md-6">
+            <div class="footer-info">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="copyright">
+          &copy; Copyright <strong><span>Gp</span></strong>. All Rights Reserved
+        </div>
+        <div class="credits">
+          Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        </div>
+      </div>
+  </footer><!-- End Footer -->
+
+  <div id="preloader"></div>
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Bootstrap core JS-->
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
+  <script>
+    // 網頁載入完成後，顯示彈跳視窗
+    window.onload = function () {
+      showPopup();
+    };
+
+    function showPopup() {
+      // 取得彈跳視窗元素
+      var popup = document.getElementById('popup');
+
+      // 顯示彈跳視窗
+      popup.style.display = 'block';
+    }
+
+    function closePopup() {
+      // 取得彈跳視窗元素
+      var popup = document.getElementById('popup');
+
+      // 關閉彈跳視窗
+      popup.style.display = 'none';
+    }
+
+
+    // RecordRTC
+    var recorder;
+    var startButton = document.getElementById('start-button');
+    var stopButton = document.getElementById('stop-button');
+    var recordedVideo = document.getElementById('recorded-video');
+    var loadingContainer = document.querySelector('.loading-container');
+
+    // 請求相機權限
+    var requestCameraPermission = function () {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(function (stream) {
+          recorder = RecordRTC(stream, {
+            type: 'video',
+            mimeType: 'video/webm; codecs="vp8"',
+            // mimeType: 'video/mp4; codecs="mpeg4, aac"',
+            videoBitsPerSecond: 3000000, // 設定影片的總位元速率 (bits per second)
+            frameRate: 30 // 設定畫格率為30FPS
+          });
+        })
+        .catch(function (error) {
+          console.error('Error accessing media devices:', error);
+        });
+    }
+
+    // 上傳影片
+    var uploadRecordedVideo = function (blob) {
+      var formData = new FormData();
+      formData.append('video', blob, 'recorded-video.webm');
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/inner-page', true);
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          console.log('檔案已成功上傳到伺服器');
+          window.location.href = "/recog-result";  // 上傳完轉跳 /recog-result 頁面
+        } else {
+          console.error('檔案上傳失敗');
+        }
+      };
+      xhr.send(formData);
+    };
+
+    var btnStartTest = function () {
+      recordedVideo.play();  // 影片播放
+      recorder.startRecording();  // 開始錄影
+      startButton.style.display = 'none'; // 隱藏開始測試按鈕
+      startButton.disabled = true;
+      stopButton.disabled = false;
+    };
+
+    var btnStopTest = function () {
+      recordedVideo.pause();  // 影片暫停
+      recorder.stopRecording(function (videoURL) {  // 停止錄影
+        uploadRecordedVideo(recorder.getBlob());
+        startButton.disabled = false;
+        stopButton.disabled = true;
+
+        startButton.style.display = 'none'; // 隱藏開始測試按鈕
+        stopButton.style.display = 'none'; // 隱藏停止測試按鈕
+        loadingContainer.style.display = 'block'; // 顯示 Loading
+      });
+    };
+
+    // 影片播放完畢後顯示停止測試按鈕
+    recordedVideo.addEventListener('ended', function () {
+      stopButton.style.display = 'block'; // 顯示停止測試按鈕
+
+      // 按鈕的顯示動畫
+      stopButton.style.animation = 'fadeInOut 2s infinite';
+    });
+
+    // 開啟頁面取得相機權限
+    requestCameraPermission();
+
+    // 開始測試
+    startButton.addEventListener('click', btnStartTest);
+
+    // 停止測試
+    stopButton.addEventListener('click', btnStopTest);
+
+  </script>
+
+  {% include "parts/_scripts.html" %}
+
+</body>
+
+
+</html>
